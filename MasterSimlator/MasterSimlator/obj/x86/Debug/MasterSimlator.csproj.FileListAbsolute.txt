@@ -1,0 +1,16 @@
+F:\菩萨项目\MasterSimlator\MasterSimlator\bin\Debug\MasterSimlator.exe
+F:\菩萨项目\MasterSimlator\MasterSimlator\bin\Debug\MasterSimlator.pdb
+F:\菩萨项目\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.Form1.resources
+F:\菩萨项目\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.Properties.Resources.resources
+F:\菩萨项目\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.csproj.GenerateResource.Cache
+F:\菩萨项目\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.exe
+F:\菩萨项目\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.pdb
+F:\菩萨项目\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.csprojResolveAssemblyReference.cache
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.exe
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.pdb
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\bin\Debug\MasterSimlator.exe
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\bin\Debug\MasterSimlator.pdb
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.csprojResolveAssemblyReference.cache
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.Form1.resources
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.Properties.Resources.resources
+D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.csproj.GenerateResource.Cache
