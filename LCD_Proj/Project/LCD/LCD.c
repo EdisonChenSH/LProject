@@ -27,8 +27,7 @@
 #define lcdSetRD() GPIO_SetBits(GPIOB,GPIO_Pin_12)
 #define lcdClrRD() GPIO_ResetBits(GPIOB,GPIO_Pin_12)
 
-//extern const unsigned char gImage_ico[32768];
-extern const unsigned char gImage_ico1[28800];
+extern const unsigned char gImage_ico[32768];
 void LCD_GPIO_Init()
 {
 	GPIO_InitTypeDef g;
@@ -167,7 +166,7 @@ void MainLCD_Init(void)
 	lcdWriteCmd(0x0102, 0x01BD);// VREG1OUT voltage
 	Delay_mS(50);                          // Delay 50ms
 	lcdWriteCmd(0x0103, 0x2500);// VDV[4:0] for VCOM amplitude
-	lcdWriteCmd(0x0281, 0x000F);// VCM[5:0] for VCOMH
+	lcdWriteCmd(0x0281, 0x0010);// VCM[5:0] for VCOMH
 	Delay_mS(50);
 	lcdWriteCmd(0x0200, 0x0000);// GRAM horizontal Address
 	lcdWriteCmd(0x0201, 0x0000);// GRAM Vertical Address
@@ -205,7 +204,6 @@ void MainLCD_Init(void)
 	lcdWriteCmd(0x0007, 0x0173);// 262K color and display ON	
 
 	Delay_mS(50);Delay_mS(50);Delay_mS(50);Delay_mS(50);
-	
 }
 void lcdSetRamAddr(u16 x,u16 y)
 {
@@ -321,24 +319,33 @@ void lcdLedSet(u8 isTurnOn)
 }
 u8 picWriteBuf[1024];
 
-	PicInfo picinfo;
-	FIL picfile;
-	FRESULT res;
-	u32 btr;	
-	u16 i=0,j=0;
-	u16 readCount;
-	u16 lastReadLength;
+u32 btr;	
+u16 i=0,j=0;
+u16 readCount;
+u16 lastReadLength;
+PicInfo picinfo;
 
-void lcdDrawPicFromFs(const char* path)
+PicInfo Get_Pic_Size(u32 FileInfo_PIC)
 {
+	PicInfo picinfo;
+	FileInfoStruct_Flash flashFileInfo_ID;
+	
+	flashFileInfo_ID.F_Start = FileInfo_PIC;
+	flashFileInfo_ID.F_Size = sizeof(PicInfo);
+	
+	F_Open_Flash(&flashFileInfo_ID);
+	sFLASH_ReadBuffer((void*)(&picinfo),flashFileInfo_ID.F_Start,flashFileInfo_ID.F_Size);
+	return picinfo;
+}
 
-	
+void lcdDrawPicFromFs(FileInfoStruct_Flash FileInfo)
+{
 	lcdClearScreen(BLACK);
-	res=f_open(&picfile,path,FA_READ);
-	res=f_read(&picfile,(void*)(&picinfo),sizeof(picinfo),&btr);
-	
+  
+	picinfo=Get_Pic_Size(PIC1_Info);
 	readCount=picinfo.PicSize/1024;
 	lastReadLength=picinfo.PicSize%1024;
+	FileInfo.F_Size=picinfo.PicSize;
 	if(lastReadLength!=0)readCount++;
 	else lastReadLength=1024;
 	lcdSetRamAddr(picinfo.x,picinfo.y);
@@ -348,16 +355,20 @@ void lcdDrawPicFromFs(const char* path)
 	{
 		if(i!=(readCount-1))
 		{
-			res=f_read(&picfile,picWriteBuf,1024,&btr);
+			F_Read_Flash(&FileInfo,picWriteBuf);
+			F_Read_Flash(&FileInfo,picWriteBuf+512);
+			
 			for(j=0;j<1024;)
 			{
 				lcdWriteData((picWriteBuf[j]<<8)+(picWriteBuf[j+1]));
 				j+=2;
-			}	
+			}			
 		}
 		else
 		{
-			res=f_read(&picfile,picWriteBuf,lastReadLength,&btr);
+			F_Read_Flash(&FileInfo,picWriteBuf);
+			F_Read_Flash(&FileInfo,picWriteBuf+512);
+		
 			for(j=0;j<lastReadLength;)
 			{
 				lcdWriteData((picWriteBuf[j]<<8)+(picWriteBuf[j+1]));
@@ -365,7 +376,20 @@ void lcdDrawPicFromFs(const char* path)
 			}				
 		}
 	}
-	f_close(&picfile);
+	lcdOpenWindows(0,0,lcdWIDTH,lcdHEIGHT);	
+}
+#define JPG_DRAW_BUFFER_SIZE 512
+
+u16 gJpgXIndex=0,gJpgYIndex=0;
+void lcdDrawJPicFromFs(FileInfoStruct_Flash FileInfo)
+{
+	lcdClearScreen(BLACK);
+	
+	picinfo=Get_Pic_Size(PIC2_Info);
+  FileInfo.F_Size = picinfo.PicSize;
+  F_Open_Flash(&FileInfo);	
+	LoadJpegFile_Flash(&FileInfo,0,0,400,240);
+	
 	lcdOpenWindows(0,0,lcdWIDTH,lcdHEIGHT);	
 }
 u8 readPhotoSenor()
@@ -377,8 +401,6 @@ void lcdAllInit()
 	LCD_GPIO_Init();
 	MainLCD_Init();
 	lcdClearScreen(BLACK);
-	lcdFillColor(100,100,50,100,LIGHTBLUE);	
-	lcdDrawPic(0,0,120,120,gImage_ico1);
 }
 
 

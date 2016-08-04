@@ -1,4 +1,5 @@
 #include "rec.h" 
+#include "Rs485.h"
  
 PicInfo gPicInformation;	
 FileInfoStruct_Flash flashFileInfo;
@@ -6,7 +7,6 @@ u8 Target_ID=0;
 u8 gPkgIndex=0;
 u8 gFileRxPkgCount=0;
 u16 gFileRxLastPkgLength=0;
-u32 canMEID = 0x0001;
 u32 file_byte = 0;
 u32 rec_byte = 0;
 u32 each_byte = 0;
@@ -48,7 +48,7 @@ void CAN_Process(void)
 			}
 			sndback = FALSE;
 		}
-		key=Can_Receive_Msg(canbuf,canMEID);
+		key=Can_Receive_Msg(canbuf,gDeviceCANAddr);
 		if (key)
 		{
 			waittime = 0; err_cnt=0;
@@ -102,8 +102,6 @@ void CAN_Process(void)
 			}
 			else if ((status==0x73)&&(sndback))//'s'开始接收图片数据 
 			{
-				Target_ID = canbuf[3];
-				
 				flashFileInfo.F_Start = PIC1_Info;
 				flashFileInfo.F_Size = sizeof(gPicInformation);
 				F_Open_Flash(&flashFileInfo);
@@ -114,8 +112,7 @@ void CAN_Process(void)
 				gPicInformation.height =240;
 				gPicInformation.weith = 400;
 				
-				memcpy(jpg_buffer,(void*)(&gPicInformation),flashFileInfo.F_Size);
-				jWriteFlashC(&flashFileInfo,flashFileInfo.F_Size);
+        Save_Pic_Size(PIC1_Info,gPicInformation);
 				
 				flashFileInfo.F_Start = FileInfo_PIC1;
 				flashFileInfo.F_Size = gPicInformation.PicSize;
@@ -144,7 +141,7 @@ void CAN_Process(void)
 		{
 			//if(status==0x61)	////////'a'	
 			//{	
-				key=Can_Receive_Msg(canbuf,canMEID);
+				key=Can_Receive_Msg(canbuf,gDeviceCANAddr);
 				if(key)//接收到有数据
 				{
 					if ((canbuf[0]==0x4A)
@@ -156,15 +153,15 @@ void CAN_Process(void)
 						tmpchr = canbuf[3];
 						if(tmpchr>0x2F && tmpchr<0x50)
 						{
-							Target_ID = tmpchr - 0x2F;
+							Target_ID = tmpchr - 0x30;
 							TRUNONOFF_LCD(Target_ID,CMD_TRUNON_LCD);
 						}
 						else 
 						{
-							Target_ID = tmpchr - 0x4F;
+							Target_ID = tmpchr - 0x50;
 							TRUNONOFF_LCD(Target_ID,CMD_TRUNOFF_LCD);
 						}
-						if(file_byte>0){each_byte = 0;rec_byte = 0;	status = 's'; sndback = TRUE;}
+						if(file_byte>0){each_byte = 0;rec_byte = 0;gPkgIndex = 0;status = 's'; sndback = TRUE;}
 					} 
 					else if ((canbuf[0]==0x4A)
 						&&(canbuf[1]==0x61)

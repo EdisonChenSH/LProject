@@ -1,15 +1,5 @@
 #include "jpegbmp.h"    
 
-//////////////////////////////////////////////////////////////////////////////////	 
-//Mini STM32开发板
-//JPG/JPEG/BMP图片显示 解码代码		   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//修改日期:2010/6/18 
-//版本：V1.4
-//版权所有，盗版必究。
-//Copyright(C) 正点原子 2009-2019
-//All rights reserved
 //********************************************************************************
 //SRAM缩减优化后，消耗SRAM:12288BYTE			  
 //移植到了SD卡上,可以解码JPEG/JPG和BMP
@@ -310,9 +300,6 @@ BOOL LoadJpegFile_Flash(FileInfoStruct_Flash *file,u16 sx,u16 sy,u16 ex,u16 ey)
 	if((SampRate_Y_H==0)||(SampRate_Y_V==0))return FALSE ;//采样率错误  
 	
 	AI_Drow_Init();  //初始化PICINFO.Div_Fac,启动智能画图	   
-
-  PIc_File.F_Start = FileInfo_PIC1 + 12;
-	PIc_File.F_Offset= 0;
   
 	funcret=Decode();//解码JPEG开始
 
@@ -326,11 +313,11 @@ BOOL LoadJpegFile_Flash(FileInfoStruct_Flash *file,u16 sx,u16 sy,u16 ex,u16 ey)
 //对指针地址进行改变!
 //pc    :当前指针
 //返回值:当前指针的减少量.在d_buffer里面自动进行了偏移
+unsigned long buffer_val=0;  //寄存区首地
+unsigned long point_val=0;	 //指针所指的当前地址
 unsigned int P_Cal(unsigned char*pc)
 {										   
 	unsigned short cont=0;//计数器
-	unsigned long buffer_val=0;  //寄存区首地址
-	unsigned long point_val=0;	 //指针所指的当前地址
 
 	unsigned char secoff;	 
 	unsigned short t;
@@ -710,7 +697,7 @@ void  GetYUV(short flag)
 				for(h=0;h<8;h++)
 					buf[(i*8+k)*SampRate_Y_H*8+j*8+h]=*pQtZzMCU++;
 }
-  
+#include "LCD.h"  
 //将解出的字按RGB形式存储 lpbmp (BGR),(BGR) ......入口Y[] U[] V[] 出口lpPtr	  
 void StoreBuffer(void)
 {
@@ -769,8 +756,16 @@ void StoreBuffer(void)
 		}
 		else break;
 	}
-	SPI_Flash_Write(bugg,PIc_File.F_Start,bugg_Size);
-	PIc_File.F_Start = PIc_File.F_Start + bugg_Size;
+	//SPI_Flash_Write(bugg,PIc_File.F_Start,bugg_Size);
+	//PIc_File.F_Start = PIc_File.F_Start + bugg_Size;
+	lcdSetRamAddr(realx-15,realy-15);
+	lcdOpenWindows(realx-15,realy-15,16,16);
+	lcdWriteReg(0x202);
+	for(i=0;i<bugg_Size;)
+	{
+    lcdWriteData((bugg[i]<<8)+(bugg[i+1]));		
+		i=i+2;
+	}
 }
 //Huffman Decode   MCU 出口 MCUBuffer  入口Blockbuffer[  ] 
 int DecodeMCUBlock(void)

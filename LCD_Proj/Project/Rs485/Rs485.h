@@ -4,9 +4,6 @@
 #include "stdint.h"
 #include <string.h>
 
-
-
-
 extern void Init_Rs485(void);
 extern void rs485SendByteArray(u8* bytesPtr,u16 length);
 extern void rs485SetRxInterrupt(u8 status);

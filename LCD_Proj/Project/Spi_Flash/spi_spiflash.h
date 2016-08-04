@@ -1,4 +1,22 @@
+#ifndef _SPIFLASH_H_
+#define _SPIFLASH_H_
+
 #include "stm32f10x.h"
+
+typedef struct{
+	uint32_t F_Start;
+	uint32_t F_Size;
+	uint32_t F_Offset;
+} FileInfoStruct_Flash;
+
+#define FileInfo_DrawType   0x0000
+#define FileInfo_485ID      0x1000
+
+#define PIC1_Info        0x10000
+#define FileInfo_PIC1    0x11000
+
+#define PIC2_Info        0x40000
+#define FileInfo_PIC2    0x41000
 
 #define sFLASH_CMD_WRITE          0x02  /*!< Write to Memory instruction */
 #define sFLASH_CMD_WRSR           0x01  /*!< Write Status Register instruction */
@@ -79,3 +97,5 @@ void SPI_GPIO_Config(void);
 void SPI_Config(void);
 void sFLASH_sector_read(uint8_t * buffer, uint32_t sector, uint16_t sector_number);
 void sFLASH_sector_write(uint8_t * buffer, uint32_t sector, uint16_t sector_number);
+
+#endif

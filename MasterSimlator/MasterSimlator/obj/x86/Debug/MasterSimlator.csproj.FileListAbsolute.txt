@@ -14,3 +14,5 @@ D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterS
 D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.Form1.resources
 D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.Properties.Resources.resources
 D:\hengic\屏项目\RProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.csproj.GenerateResource.Cache
+C:\Users\Edison\Documents\GitHub\LProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.exe
+C:\Users\Edison\Documents\GitHub\LProject\MasterSimlator\MasterSimlator\obj\x86\Debug\MasterSimlator.pdb

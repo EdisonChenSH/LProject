@@ -4,7 +4,6 @@
 
 void Init_Rs485(void)
 {
-	u8 i=0;char atCmd[50];
   GPIO_InitTypeDef GPIO_InitStructure;
   USART_InitTypeDef USART_InitStructure;
   NVIC_InitTypeDef NVIC_InitStructure;

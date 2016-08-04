@@ -71,9 +71,9 @@ void sFLASH_sector_read(uint8_t * buffer, uint32_t sector, uint16_t sector_numbe
   sFLASH_ReadBuffer(buffer,Address,FLASH_SECTOR_SIZE*sector_number);
 }
 
-uint8_t buffer_data[4096];
 void SPI_Flash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)  
 {
+	uint8_t buffer_data[4096];
 	uint32_t cycle_number=0;
 	uint32_t secpos;
 	uint16_t secoff;
@@ -113,6 +113,8 @@ void SPI_Flash_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite
 }
 void SPI_FLASH_PageErase(uint32_t PageAddr)
 {
+	uint8_t buffer_data[4096];
+	
 	uint32_t cycle_number=0;
 	uint32_t secpos;
 	uint16_t secoff;
@@ -471,3 +473,4 @@ void sFLASH_WaitForWriteEnd(void)
   /*!< Deselect the FLASH: Chip Select high */
   sFLASH_CS_HIGH();
 }
+

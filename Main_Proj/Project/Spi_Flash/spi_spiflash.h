@@ -17,50 +17,6 @@ typedef struct{
 #define PIC1_Info        0x10000
 #define FileInfo_PIC1    0x11000
 
-#define FileInfo_PIC2    0x20000
-#define FileInfo_PIC3    0x30000
-#define FileInfo_PIC4    0x40000
-#define FileInfo_PIC5    0x50000
-#define FileInfo_PIC6    0x60000
-#define FileInfo_PIC7    0x70000
-#define FileInfo_PIC8    0x80000
-#define FileInfo_PIC9    0x90000
-#define FileInfo_PIC10   0xA0000
-#define FileInfo_PIC11   0xB0000
-#define FileInfo_PIC12   0xC0000
-#define FileInfo_PIC13   0xD0000
-#define FileInfo_PIC14   0xE0000
-#define FileInfo_PIC15   0xF0000
-#define FileInfo_PIC16   0x100000
-#define FileInfo_PIC17   0x110000
-#define FileInfo_PIC18   0x120000
-#define FileInfo_PIC19   0x130000
-#define FileInfo_PIC20   0x140000
-#define FileInfo_PIC21   0x150000
-#define FileInfo_PIC22   0x160000
-#define FileInfo_PIC23   0x170000
-#define FileInfo_PIC24   0x180000
-#define FileInfo_PIC25   0x190000
-#define FileInfo_PIC26   0x100000
-#define FileInfo_PIC27   0x110000
-#define FileInfo_PIC28   0x120000
-#define FileInfo_PIC29   0x130000
-#define FileInfo_PIC30   0x140000
-#define FileInfo_PIC31   0x150000
-#define FileInfo_PIC32   0x160000
-#define FileInfo_PIC33   0x170000
-#define FileInfo_PIC34   0x180000
-#define FileInfo_PIC35   0x190000
-#define FileInfo_PIC36   0x100000
-#define FileInfo_PIC37   0x110000
-#define FileInfo_PIC38   0x120000
-#define FileInfo_PIC39   0x130000
-#define FileInfo_PIC40   0x140000
-#define FileInfo_PIC41   0x150000
-#define FileInfo_PIC42   0x160000
-#define FileInfo_PIC43   0x170000
-#define FileInfo_PIC44   0x180000
-
 #define sFLASH_CMD_WRITE          0x02  /*!< Write to Memory instruction */
 #define sFLASH_CMD_WRSR           0x01  /*!< Write Status Register instruction */
 #define sFLASH_CMD_WREN           0x06  /*!< Write enable instruction */

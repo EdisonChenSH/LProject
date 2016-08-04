@@ -2,6 +2,7 @@
 #define _LCD_H_
 
 #include "stm32f10x.h"
+#include "jpegbmp.h"
 
 #define lcdWIDTH  ( 400 )
 #define lcdHEIGHT ( 240 )
@@ -38,6 +39,13 @@
 extern void lcdAllInit();
 extern void lcdLedSet(u8 isTurnOn);
 extern u8 readPhotoSenor();
-extern void lcdDrawPicFromFs(const char* path);
+extern void lcdDrawPicFromFs(FileInfoStruct_Flash FileInfo);
+extern void lcdDrawJPicFromFs(FileInfoStruct_Flash FileInfo);
+
+void lcdWriteReg(u16 reg);
+void lcdWriteData(u16 data);
+void lcdSetRamAddr(u16 x,u16 y);
+void lcdOpenWindows(u16 x,u16 y,u16 width,u16 height);
+
 #endif
 

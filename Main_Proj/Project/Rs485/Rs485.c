@@ -202,6 +202,7 @@ void TRUNONOFF_LCD(uint8_t Rs485_Id,uint8_t OnOffCmd)
 		Rs485_Process();
 	}	
   StopRecTimer();
+	Rs485_Rec_Flag.OnOff_Flag = 0;
 }
 
 u8 Read_Ir(uint8_t Rs485_Id)
@@ -226,6 +227,7 @@ u8 Read_Ir(uint8_t Rs485_Id)
 	if(Rs485_Rec_Flag.Sensor_Flag==0)returnSensor=0xFE;
 	else returnSensor=receive_data[2];
   StopRecTimer();
+	Rs485_Rec_Flag.Sensor_Flag = 0;
 	return returnSensor;
 }
 
@@ -278,17 +280,12 @@ void Update_Pic(uint8_t Rs485_Id)
 
 	Rs485_Id_Rec=Rs485_Id;
 	picinfo=Get_Pic_Size(PIC1_Info);
-	picinfo.PicSize = 400*240*2;
-	picinfo.x =0 ;
-	picinfo.y =0;
-	picinfo.weith =400;
-	picinfo.height=240;
 	readCount=picinfo.PicSize/1024;
 	lastReadLength=picinfo.PicSize%1024;
 	if(lastReadLength!=0)readCount++;
 	else lastReadLength=1024;
 	
-	flashFileInfo_Read.F_Start = FileInfo_PIC2;
+	flashFileInfo_Read.F_Start = FileInfo_PIC1;
 	flashFileInfo_Read.F_Size  = picinfo.PicSize;
 	F_Open_Flash(&flashFileInfo_Read);
 	
@@ -320,6 +317,7 @@ void Update_Pic(uint8_t Rs485_Id)
 
 	if(Rs485_Rec_Flag.UPDATE_PIC_Flag==0x01)
 	{
+		Rs485_Rec_Flag.UPDATE_PIC_Flag = 0;
 		for(i=0;i<readCount;i++)
 		{
 			sendCount=0;Rs485_Rec_Flag.SEND_PIC_Flag=0;
@@ -344,14 +342,14 @@ void Update_Pic(uint8_t Rs485_Id)
 			rs485SendByteArray(TXBuffer,sendCount);
 			
 			StartRecTimer();
-			while(Rs485_Rec_Flag.SEND_PIC_Flag==0 && CmpRecTimer(300))
+			while(Rs485_Rec_Flag.SEND_PIC_Flag==0 && CmpRecTimer(10000))
 			{
 				Rs485_Process();
 			}	
 			StopRecTimer();
 		}
 	}
-	
+	Rs485_Rec_Flag.SEND_PIC_Flag = 0;
 	sendCount=0;
 	TXBuffer[sendCount]=Rs485_Id;sendCount++;
 	TXBuffer[sendCount]=CMD_FINISH_UPDATE_PIC;sendCount++;
@@ -366,7 +364,7 @@ void Update_Pic(uint8_t Rs485_Id)
 		Rs485_Process();
 	}	
   StopRecTimer();
-	
+	Rs485_Rec_Flag.FINISH_UPDATE_Flag = 0;
 	if(Flie_size!=picinfo.PicSize)
 	{
 		

@@ -1,11 +1,13 @@
 #include "Process.h"
+#include "jpegbmp.h"
 
-FATFS gFatfs;
-FIL gFile;
-FRESULT gRes;
-u32 gByte2Write,gByte2Read;
 u8 readBuf[]={"this is a rs485 demo"};
 u8 gDeviceAddr=10;
+#define PIC_TYPE_BMP 0
+#define PIC_TYPE_JPG 1
+u8 gPicDrawType=PIC_TYPE_BMP;
+FileInfoStruct_Flash flashFileInfo_ID;
+FileInfoStruct_Flash flashFileInfo;
 void ProcessInit()
 {
 	delayByTIM_Init(72);
@@ -17,69 +19,31 @@ void ProcessInit()
 	printf("Init_Rs485() OK!\n");
 	SPI_Config();
 	printf("SPI_Config() OK!\n");
-	gRes = f_mount(0,&gFatfs);
-	gRes=f_open(&gFile,"0:485ADDr.adr",FA_READ);
-	gRes=f_close(&gFile);
-	if(gRes==FR_OK)
+
+	flashFileInfo_ID.F_Start = FileInfo_485ID;
+	flashFileInfo_ID.F_Size = 1;	
+	F_Open_Flash(&flashFileInfo_ID);
+	sFLASH_ReadBuffer(&gDeviceAddr,flashFileInfo_ID.F_Start,flashFileInfo_ID.F_Size);
+	
+	flashFileInfo_ID.F_Start = FileInfo_DrawType;
+	flashFileInfo_ID.F_Size = 1;	
+	F_Open_Flash(&flashFileInfo_ID);
+	sFLASH_ReadBuffer(&gPicDrawType,flashFileInfo_ID.F_Start,flashFileInfo_ID.F_Size);
+	
+	if(gPicDrawType==PIC_TYPE_BMP)
 	{
-		printf("f_mount(0,&gFatfs) OK!\n");
+		flashFileInfo.F_Start = FileInfo_PIC1;
+		F_Open_Flash(&flashFileInfo);				
+		lcdDrawPicFromFs(flashFileInfo);
 	}
-	else if(gRes==FR_INVALID_OBJECT)
+	else if(gPicDrawType==PIC_TYPE_JPG)
 	{
-		printf("f_mount(0,&gFatfs) Fail!\n");
-		gRes = f_mkfs(0,1,4096);
-		if(gRes==FR_OK)
-		{
-			printf("f_mkfs(0,1,4096) OK!\n");
-		}
-		else
-		{
-			printf("f_mkfs(0,1,4096) Fail!\n");
-			printf("system boot Fail!\n");
-			while(1);
-		}
+		lcdLedSet(0x00);
+		flashFileInfo.F_Start = FileInfo_PIC2;
+		lcdDrawJPicFromFs(flashFileInfo);
+		lcdOpenWindows(0,0,lcdWIDTH,lcdHEIGHT);
+		lcdLedSet(0x01);
 	}
-	else
-	{
-		printf("f_mount(0,&gFatfs) Exciption!\n");
-		printf("system boot Fail!\n");
-		while(1);
-	}	
-	gRes=f_open(&gFile,"0:485ADDr.adr",FA_READ);
-	if(gRes==FR_NO_FILE)
-	{
-		gRes=f_open(&gFile,"0:485ADDr.adr",FA_CREATE_NEW|FA_WRITE);
-		gRes=f_write(&gFile,&gDeviceAddr,1,&gByte2Write);
-		gRes=f_close(&gFile);
-	}
-	else if(gRes==FR_OK)
-	{
-		gRes=f_read(&gFile,&gDeviceAddr,1,&gByte2Write);
-		gRes=f_close(&gFile);
-	}
-	else
-	{
-		printf("open files Fail!\n");
-		printf("system boot Fail!\n");		
-		while(1);
-	}
-	gRes=f_open(&gFile,"0:ready.pic",FA_READ);
-	if(gRes==FR_NO_FILE)
-	{
-		printf("Ready Pic File Not Found!\n");
-	}
-	else if(gRes==FR_OK)
-	{
-		gRes=f_close(&gFile);
-		lcdDrawPicFromFs("0:ready.pic");
-	}
-	else
-	{
-		printf("open files Fail!\n");
-		printf("system boot Fail!\n");		
-		while(1);
-	}
-	//lcdDrawPicFromFs("0:temp.pic");
 }
 
 u32 gSystemTicCounter=0;
@@ -150,18 +114,29 @@ u16 Cal_CRC16(const uint8_t* data, uint32_t size)
 }
 void StoreAddrToFlash()
 {
-	gRes=f_open(&gFile,"0:485ADDr.adr",FA_WRITE);
-	gRes=f_write(&gFile,&gDeviceAddr,1,&gByte2Write);
-	gRes=f_close(&gFile);
+	FileInfoStruct_Flash flashFileInfo_ID;
+	
+	flashFileInfo_ID.F_Start = FileInfo_485ID;
+	flashFileInfo_ID.F_Size = 1;
+	
+	jpg_buffer[0]=gDeviceAddr;
+	F_Open_Flash(&flashFileInfo_ID);
+	jWriteFlashC(&flashFileInfo_ID,flashFileInfo_ID.F_Size);
 }
 #define CMD_GET_ADDR 0
 #define CMD_SET_ADDR 1
 #define CMD_TRUNON_LCD 2
 #define CMD_TRUNOFF_LCD 3
 #define CMD_READ_SENOR 4
+
 #define CMD_START_UPDATE_PIC 5
 #define CMD_SEND_PIC_DATA 6
 #define CMD_FINISH_UPDATE_PIC 7
+
+#define CMD_START_UPDATE_JPGPIC 8
+#define CMD_SEND_JPGPIC_DATA 9
+#define CMD_FINISH_UPDATE_JPGPIC 10
+
 
 #define STATUS_OK 0
 #define STATUS_PKG_INDEX_ERROR 1
@@ -253,12 +228,18 @@ void SlaveFunc()
 			gTxBuffer[i]=gDeviceAddr;i++;
 			gTxBuffer[i]=CMD_START_UPDATE_PIC;i++;
 
-			gRes=f_open(&gFile,"0:temp.pic",FA_CREATE_ALWAYS|FA_WRITE);	
-			gRes=f_write(&gFile,(void *)(&gPicInformation),sizeof(gPicInformation),&gByte2Write);
-			gRes=f_close(&gFile);
+			flashFileInfo.F_Start = PIC1_Info;
+			flashFileInfo.F_Size = sizeof(gPicInformation);
+			F_Open_Flash(&flashFileInfo);
+			memcpy(jpg_buffer,(void*)(&gPicInformation),flashFileInfo.F_Size);
+			jWriteFlashC(&flashFileInfo,flashFileInfo.F_Size);
+
+			flashFileInfo.F_Start = FileInfo_PIC1;
+			flashFileInfo.F_Size = gPicInformation.PicSize;
+			F_Open_Flash(&flashFileInfo);	
 			gPkgIndex=0;
 			
-			gTxBuffer[i]=(u8)gRes;i++;
+			gTxBuffer[i]=(u8)0x00;i++;
 			crcValue=Cal_CRC16(gTxBuffer,i);
 			gTxBuffer[i]=(u8)(crcValue>>8);i++;
 			gTxBuffer[i]=(u8)(crcValue&0x00ff);i++;
@@ -267,7 +248,6 @@ void SlaveFunc()
 			gFileRxLastPkgLength=gPicInformation.PicSize%1024;
 			if(gFileRxLastPkgLength!=0)gFileRxPkgCount+=1;
 			else gFileRxLastPkgLength=1024;
-			
 		}
 		else if(gRxBuffer[1]==CMD_SEND_PIC_DATA)
 		{
@@ -275,19 +255,19 @@ void SlaveFunc()
 			{
 				if(gPkgIndex+1<gFileRxPkgCount)
 				{
-					gRes=f_open(&gFile,"0:temp.pic",FA_WRITE);	
-					gRes=f_lseek(&gFile,gFile.fsize);
-					gRes=f_write(&gFile,(gRxBuffer+3),1024,&gByte2Write);
-					gRes=f_close(&gFile);
+					memcpy(jpg_buffer,(gRxBuffer+3),1024);
+					jWriteFlashC(&flashFileInfo,1024);
+					flashFileInfo.F_Start+=1024;
+					
 					gPkgIndex++;
 					gFileRxStatus=STATUS_OK;
 				}
 				else if(gPkgIndex+1==gFileRxPkgCount)
 				{
-					gRes=f_open(&gFile,"0:temp.pic",FA_WRITE);	
-					gRes=f_lseek(&gFile,gFile.fsize);
-					gRes=f_write(&gFile,(gRxBuffer+3),gFileRxLastPkgLength,&gByte2Write);
-					gRes=f_close(&gFile);
+          memcpy(jpg_buffer,(gRxBuffer+3),gFileRxLastPkgLength);
+					jWriteFlashC(&flashFileInfo,gFileRxLastPkgLength);
+					flashFileInfo.F_Start+=gFileRxLastPkgLength;
+					
 					gPkgIndex++;
 					gFileRxStatus=STATUS_OK;					
 				}
@@ -314,33 +294,18 @@ void SlaveFunc()
 			gTxBuffer[i]=gDeviceAddr;i++;
 			gTxBuffer[i]=CMD_FINISH_UPDATE_PIC;i++;	
 
-			
-			gRes=f_open(&gFile,"0:temp.pic",FA_READ);	
-			if(gRes==FR_OK)
+			gTxBuffer[i]=flashFileInfo.F_Start>>24;i++;
+			gTxBuffer[i]=flashFileInfo.F_Start>>16;i++;
+			gTxBuffer[i]=flashFileInfo.F_Start>>8;i++;
+			gTxBuffer[i]=flashFileInfo.F_Start>>0;i++;
+
+			if((flashFileInfo.F_Start-FileInfo_PIC1)==gPicInformation.PicSize)
 			{
-				gTxBuffer[i]=gFile.fsize>>24;i++;
-				gTxBuffer[i]=gFile.fsize>>16;i++;
-				gTxBuffer[i]=gFile.fsize>>8;i++;
-				gTxBuffer[i]=gFile.fsize>>0;i++;
-				gRes=f_close(&gFile);
-				if(gFile.fsize-sizeof(gPicInformation)==gPicInformation.PicSize)
-				{
-					gRes=f_unlink("0:ready.pic");
-					gRes=f_rename("0:temp.pic","ready.pic");
-					isUpdateSuccess=1;
-				}
-				else
-				{
-
-				}
-
+				isUpdateSuccess=1;
 			}
 			else
 			{
-				gTxBuffer[i]=0;i++;
-				gTxBuffer[i]=0;i++;
-				gTxBuffer[i]=0;i++;
-				gTxBuffer[i]=0;i++;
+
 			}
 			crcValue=Cal_CRC16(gTxBuffer,i);
 			gTxBuffer[i]=(u8)(crcValue>>8);i++;
@@ -348,9 +313,144 @@ void SlaveFunc()
 			rs485SendByteArray(gTxBuffer,i);
 			if(isUpdateSuccess)
 			{
-				lcdDrawPicFromFs("0:ready.pic");
+				gPicDrawType=PIC_TYPE_BMP;
+        
+				flashFileInfo.F_Start = FileInfo_PIC1;
+        F_Open_Flash(&flashFileInfo);				
+				lcdDrawPicFromFs(flashFileInfo);
+				
+				flashFileInfo.F_Start = FileInfo_DrawType;
+	      flashFileInfo.F_Size = 1;
+	
+	      jpg_buffer[0]=gPicDrawType;
+	      F_Open_Flash(&flashFileInfo);
+	      jWriteFlashC(&flashFileInfo,flashFileInfo.F_Size);
 			}
 		}
+		else if(gRxBuffer[1]==CMD_START_UPDATE_JPGPIC)
+		{
+			//memcpy((void *)(&gPicInformation),(gRxBuffer+2),sizeof(gPicInformation));
+			gPicInformation.PicSize=(gRxBuffer[2]<<24)+(gRxBuffer[3]<<16)+(gRxBuffer[4]<<8)+(gRxBuffer[5]);
+			gPicInformation.x=(gRxBuffer[6]<<8)+(gRxBuffer[7]);
+			gPicInformation.y=(gRxBuffer[8]<<8)+(gRxBuffer[9]);
+			gPicInformation.weith=(gRxBuffer[10]<<8)+(gRxBuffer[11]);
+			gPicInformation.height=(gRxBuffer[12]<<8)+(gRxBuffer[13]);
+
+			gTxBuffer[i]=gDeviceAddr;i++;
+			gTxBuffer[i]=CMD_START_UPDATE_JPGPIC;i++;
+
+			flashFileInfo.F_Start = PIC2_Info;
+			flashFileInfo.F_Size = sizeof(gPicInformation);
+			F_Open_Flash(&flashFileInfo);
+			memcpy(jpg_buffer,(void*)(&gPicInformation),flashFileInfo.F_Size);
+			jWriteFlashC(&flashFileInfo,flashFileInfo.F_Size);
+
+			flashFileInfo.F_Start = FileInfo_PIC2;
+			flashFileInfo.F_Size = gPicInformation.PicSize;
+			F_Open_Flash(&flashFileInfo);	
+			gPkgIndex=0;
+			
+			gTxBuffer[i]=(u8)0x00;i++;
+			crcValue=Cal_CRC16(gTxBuffer,i);
+			gTxBuffer[i]=(u8)(crcValue>>8);i++;
+			gTxBuffer[i]=(u8)(crcValue&0x00ff);i++;
+			rs485SendByteArray(gTxBuffer,i);
+			gFileRxPkgCount=gPicInformation.PicSize/1024;
+			gFileRxLastPkgLength=gPicInformation.PicSize%1024;
+			if(gFileRxLastPkgLength!=0)gFileRxPkgCount+=1;
+			else gFileRxLastPkgLength=1024;
+		}
+		else if(gRxBuffer[1]==CMD_SEND_JPGPIC_DATA)
+		{
+			if(gPkgIndex==gRxBuffer[2])
+			{
+				if(gPkgIndex+1<gFileRxPkgCount)
+				{
+					memcpy(jpg_buffer,(gRxBuffer+3),1024);
+					jWriteFlashC(&flashFileInfo,1024);
+					flashFileInfo.F_Start+=1024;
+					
+					gPkgIndex++;
+					gFileRxStatus=STATUS_OK;
+				}
+				else if(gPkgIndex+1==gFileRxPkgCount)
+				{
+          memcpy(jpg_buffer,(gRxBuffer+3),gFileRxLastPkgLength);
+					jWriteFlashC(&flashFileInfo,gFileRxLastPkgLength);
+					flashFileInfo.F_Start+=gFileRxLastPkgLength;
+					
+					gPkgIndex++;
+					gFileRxStatus=STATUS_OK;					
+				}
+				else
+				{
+					gFileRxStatus=STATUS_PKG_INDEX_ERROR;
+				}
+			}
+			else
+			{
+				gFileRxStatus=STATUS_PKG_INDEX_ERROR;
+			}
+			gTxBuffer[i]=gDeviceAddr;i++;
+			gTxBuffer[i]=CMD_SEND_JPGPIC_DATA;i++;			
+			gTxBuffer[i]=gFileRxStatus;i++;
+			crcValue=Cal_CRC16(gTxBuffer,i);
+			gTxBuffer[i]=(u8)(crcValue>>8);i++;
+			gTxBuffer[i]=(u8)(crcValue&0x00ff);i++;
+			rs485SendByteArray(gTxBuffer,i);
+		}
+		else if(gRxBuffer[1]==CMD_FINISH_UPDATE_JPGPIC)
+		{
+			isUpdateSuccess=0;
+			gTxBuffer[i]=gDeviceAddr;i++;
+			gTxBuffer[i]=CMD_FINISH_UPDATE_JPGPIC;i++;	
+
+			gTxBuffer[i]=flashFileInfo.F_Start>>24;i++;
+			gTxBuffer[i]=flashFileInfo.F_Start>>16;i++;
+			gTxBuffer[i]=flashFileInfo.F_Start>>8;i++;
+			gTxBuffer[i]=flashFileInfo.F_Start>>0;i++;
+
+			if(flashFileInfo.F_Start-FileInfo_PIC2==gPicInformation.PicSize)
+			{
+				isUpdateSuccess=1;
+			}
+			else
+			{
+
+			}
+			crcValue=Cal_CRC16(gTxBuffer,i);
+			gTxBuffer[i]=(u8)(crcValue>>8);i++;
+			gTxBuffer[i]=(u8)(crcValue&0x00ff);i++;
+			rs485SendByteArray(gTxBuffer,i);
+			if(isUpdateSuccess)
+			{
+				gPicDrawType=PIC_TYPE_JPG;
+        flashFileInfo.F_Start = FileInfo_PIC2;
+				lcdDrawJPicFromFs(flashFileInfo);
+				
+				flashFileInfo.F_Start = FileInfo_DrawType;
+	      flashFileInfo.F_Size = 1;
+	
+	      jpg_buffer[0]=gPicDrawType;
+	      F_Open_Flash(&flashFileInfo);
+	      jWriteFlashC(&flashFileInfo,flashFileInfo.F_Size);
+			}
+			else
+			{
+				gPicDrawType=PIC_TYPE_BMP;
+        
+				flashFileInfo.F_Start = FileInfo_PIC1;
+        F_Open_Flash(&flashFileInfo);				
+				lcdDrawPicFromFs(flashFileInfo);
+				
+				flashFileInfo.F_Start = FileInfo_DrawType;
+	      flashFileInfo.F_Size = 1;
+	
+	      jpg_buffer[0]=gPicDrawType;
+	      F_Open_Flash(&flashFileInfo);
+	      jWriteFlashC(&flashFileInfo,flashFileInfo.F_Size);
+			}
+		}		
 	}
 }
 
@@ -402,6 +502,7 @@ void Process()
 						gCurrentStatus=IDEL;
 						gRxBufferIndex=0;						
 					}
+					
 				}
 				else
 				{
