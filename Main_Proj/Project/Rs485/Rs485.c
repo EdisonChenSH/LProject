@@ -342,10 +342,14 @@ void Update_Pic(uint8_t Rs485_Id)
 			rs485SendByteArray(TXBuffer,sendCount);
 			
 			StartRecTimer();
-			while(Rs485_Rec_Flag.SEND_PIC_Flag==0 && CmpRecTimer(10000))
+			while(Rs485_Rec_Flag.SEND_PIC_Flag==0 && CmpRecTimer(1000))
 			{
 				Rs485_Process();
 			}	
+			if(Rs485_Rec_Flag.SEND_PIC_Flag==2 || CmpRecTimer(1000)!=1)
+			{
+				i--;sendCount=sendCount-1024;
+			}
 			StopRecTimer();
 		}
 	}
@@ -379,6 +383,7 @@ void SlaveFunc()
 	{
 		if(receive_data[1]==CMD_485GET_ADDR)
 		{
+			Rs485_LED_Tog();
 			TXBuffer[i]=gDevice485Addr;i++;
 			TXBuffer[i]=CMD_485GET_ADDR;i++;
 			TXBuffer[i]=gDevice485Addr;i++;
@@ -391,6 +396,7 @@ void SlaveFunc()
 		{
 			if(receive_data[2]!=0)
 			{
+				Rs485_LED_Tog();
 				gDevice485Addr=receive_data[2];
 				Store485AddrToFlash();
 				TXBuffer[i]=gDevice485Addr;i++;
@@ -404,6 +410,7 @@ void SlaveFunc()
 		}
 		else if(receive_data[1]==CMD_CANGET_ADDR)
 		{
+			Rs485_LED_Tog();
 			TXBuffer[i]=gDeviceCANAddr;i++;
 			TXBuffer[i]=CMD_485GET_ADDR;i++;
 			TXBuffer[i]=gDeviceCANAddr;i++;
@@ -416,6 +423,7 @@ void SlaveFunc()
 		{
 			if(receive_data[2]!=0)
 			{
+				Rs485_LED_Tog();
 				gDeviceCANAddr=receive_data[2];
 				StoreCANAddrToFlash();
 				TXBuffer[i]=gDeviceCANAddr;i++;
@@ -432,28 +440,34 @@ void SlaveFunc()
 	{
 		if(receive_data[1]==CMD_TRUNON_LCD)
 		{
+			Rs485_LED_Tog();
       Rs485_Rec_Flag.OnOff_Flag=0x01; 
 		}
 		else if(receive_data[1]==CMD_TRUNOFF_LCD)
 		{
+			Rs485_LED_Tog();
       Rs485_Rec_Flag.OnOff_Flag=0x01;
 		}
 		else if(receive_data[1]==CMD_READ_SENOR)
 		{
+			Rs485_LED_Tog();
       Rs485_Rec_Flag.Sensor_Flag=0x01;
 		}
 		else if(receive_data[1]==CMD_START_UPDATE_PIC)
 		{
+			 Rs485_LED_Tog();
        if(receive_data[2]==0)Rs485_Rec_Flag.UPDATE_PIC_Flag=0x01;
        else Rs485_Rec_Flag.UPDATE_PIC_Flag=0x02;		
 		}
 		else if(receive_data[1]==CMD_SEND_PIC_DATA)
 		{
+			 Rs485_LED_Tog();
        if(receive_data[2]==0)Rs485_Rec_Flag.SEND_PIC_Flag=0x01;
        else Rs485_Rec_Flag.SEND_PIC_Flag=0x02;	       
 		}
 		else if(receive_data[1]==CMD_FINISH_UPDATE_PIC)
 		{
+			 Rs485_LED_Tog();
        Rs485_Rec_Flag.FINISH_UPDATE_Flag=0x01;
        Flie_size=(receive_data[2]<<24)|(receive_data[3]<<16)|(receive_data[4]<<8)|(receive_data[5]);
 		}
@@ -488,6 +502,7 @@ u8 CmpTimer(u16 Tic)
 }
 
 u32 gSystemRecCounter=0;
+u32 gSystemWorkLedCounter=0;
 u8 gSystemRecFlg=0;
 void StartRecTimer()
 {
@@ -520,6 +535,7 @@ void SysTick_Handler(void)
 {
 	if(gSystemTicFlg)gSystemTicCounter++;
 	if(gSystemRecFlg)gSystemRecCounter++;
+	gSystemWorkLedCounter++;
 }
 
 #define IDEL 0

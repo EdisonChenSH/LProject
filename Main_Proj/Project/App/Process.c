@@ -18,9 +18,31 @@ void GPIO_buffer(void)
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	GPIO_SetBits(GPIOB,GPIO_Pin_3);
-	GPIO_SetBits(GPIOB,GPIO_Pin_4);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_15);
+}
+
+uint8_t workledflag=0;
+uint8_t Rs485ledflag=0;
+uint8_t Canledflag=0;
+void Work_LED_Tog(void)
+{
+	workledflag=~workledflag;
+	if(workledflag==0)GPIO_SetBits(GPIOB,GPIO_Pin_4);
+	else GPIO_ResetBits(GPIOB,GPIO_Pin_4);
+}
+
+void Rs485_LED_Tog(void)
+{
+	Rs485ledflag=~Rs485ledflag;
+	if(Rs485ledflag==0)GPIO_SetBits(GPIOB,GPIO_Pin_3);
+	else GPIO_ResetBits(GPIOB,GPIO_Pin_3);
+}
+
+void CAN_LED_Tog(void)
+{
+	Canledflag=~Canledflag;
+	if(Canledflag==0)GPIO_SetBits(GPIOA,GPIO_Pin_15);
+	else GPIO_ResetBits(GPIOA,GPIO_Pin_15);
 }
 
 void ProcessInit()

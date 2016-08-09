@@ -12,6 +12,7 @@ int main(void)
   {
 		Rs485_Process();
 		CAN_Process();
+		if(gSystemWorkLedCounter>500){Work_LED_Tog();gSystemWorkLedCounter=0;}
 	}
 }
 

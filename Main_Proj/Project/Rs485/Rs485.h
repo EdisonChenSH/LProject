@@ -48,7 +48,7 @@ typedef struct{
 
 extern uint8_t  gDeviceCANAddr;
 extern uint8_t  gDevice485Addr;
-
+extern u32  gSystemWorkLedCounter;
 void test_485_Trans(void);
 void Init_Rs485(void);
 void Rs485_Process(void);

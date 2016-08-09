@@ -19,4 +19,7 @@ typedef struct{
 extern void ProcessInit();
 extern void Process();
 void GPIO_buffer(void);
+void Work_LED_Tog(void);
+void Rs485_LED_Tog(void);
+void CAN_LED_Tog(void);
 #endif

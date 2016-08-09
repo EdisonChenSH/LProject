@@ -51,6 +51,7 @@ void CAN_Process(void)
 		key=Can_Receive_Msg(canbuf,gDeviceCANAddr);
 		if (key)
 		{
+			CAN_LED_Tog();
 			waittime = 0; err_cnt=0;
 			jcopy(canbuf, key, each_byte);
 			rec_byte+=key;
@@ -144,6 +145,7 @@ void CAN_Process(void)
 				key=Can_Receive_Msg(canbuf,gDeviceCANAddr);
 				if(key)//接收到有数据
 				{
+					CAN_LED_Tog();
 					if ((canbuf[0]==0x4A)
 						&&(canbuf[1]==0x61)
 						&&(canbuf[2]==0x73)
