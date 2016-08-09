@@ -276,6 +276,7 @@ void Update_Pic(uint8_t Rs485_Id)
 	u16 sendCount=0;
 	u16 lastReadLength;
 	u16 crcValue=0;
+	u8 retransmissionsnum=0;
 	PicInfo picinfo;
 
 	Rs485_Id_Rec=Rs485_Id;
@@ -348,8 +349,9 @@ void Update_Pic(uint8_t Rs485_Id)
 			}	
 			if(Rs485_Rec_Flag.SEND_PIC_Flag==2 || CmpRecTimer(1000)!=1)
 			{
-				i--;sendCount=sendCount-1024;
+				i--;sendCount=sendCount-1024;retransmissionsnum++;
 			}
+			if(retransmissionsnum>10)break;
 			StopRecTimer();
 		}
 	}

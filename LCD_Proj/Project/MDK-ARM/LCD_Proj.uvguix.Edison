@@ -75,8 +75,8 @@
       <flags>2</flags>
       <showCmd>3</showCmd>
       <MinPosition>
-        <xPos>-32000</xPos>
-        <yPos>-32000</yPos>
+        <xPos>-1</xPos>
+        <yPos>-1</yPos>
       </MinPosition>
       <MaxPosition>
         <xPos>-1</xPos>
@@ -2596,7 +2596,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\LCD\jpegbmp.h</Name>
+        <Name>C:\Users\Edison\Documents\GitHub\LProject\LCD_Proj\Project\LCD\jpegbmp.h</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>7</TopLine>
         <CurrentLine>8</CurrentLine>
@@ -2633,9 +2633,9 @@
       </Doc>
       <Doc>
         <Name>..\App\Process.c</Name>
-        <ColumnNumber>10</ColumnNumber>
-        <TopLine>359</TopLine>
-        <CurrentLine>372</CurrentLine>
+        <ColumnNumber>8</ColumnNumber>
+        <TopLine>365</TopLine>
+        <CurrentLine>375</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -2650,7 +2650,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\LCD\LCD.h</Name>
+        <Name>C:\Users\Edison\Documents\GitHub\LProject\LCD_Proj\Project\LCD\LCD.h</Name>
         <ColumnNumber>13</ColumnNumber>
         <TopLine>26</TopLine>
         <CurrentLine>48</CurrentLine>
@@ -2669,7 +2669,7 @@
       </Doc>
       <Doc>
         <Name>..\LCD\LCD.c</Name>
-        <ColumnNumber>20</ColumnNumber>
+        <ColumnNumber>22</ColumnNumber>
         <TopLine>206</TopLine>
         <CurrentLine>221</CurrentLine>
         <Folding>1</Folding>
@@ -2695,7 +2695,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\Spi_Flash\spi_spiflash.h</Name>
+        <Name>C:\Users\Edison\Documents\GitHub\LProject\LCD_Proj\Project\Spi_Flash\spi_spiflash.h</Name>
         <ColumnNumber>21</ColumnNumber>
         <TopLine>10</TopLine>
         <CurrentLine>19</CurrentLine>
@@ -2704,7 +2704,7 @@
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
-        <Name>..\App\Process.h</Name>
+        <Name>C:\Users\Edison\Documents\GitHub\LProject\LCD_Proj\Project\App\Process.h</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>1</TopLine>
         <CurrentLine>5</CurrentLine>
