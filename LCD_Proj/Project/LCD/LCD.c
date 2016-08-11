@@ -62,8 +62,8 @@ void lcdWriteReg(u16 reg)
 	lcdClrDC();
 	
 	lcdClrCs();
-	
-	lcdClrWR();
+
+	lcdClrWR();	
 	lcdGpioPutData(reg>>8);
 	lcdSetWR();
 	
@@ -74,25 +74,24 @@ void lcdWriteReg(u16 reg)
 	lcdSetCs();
 }
 
-
-
 void lcdWriteData(u16 data)
 {
 	lcdSetRD();
 	lcdSetDC();
 	
 	lcdClrCs();
-	
-	lcdClrWR();
+
+	lcdClrWR();	
 	lcdGpioPutData(data>>8);
 	lcdSetWR();
 	
-	lcdClrWR();
+	lcdClrWR();	
 	lcdGpioPutData(data&0x00ff);
 	lcdSetWR();
 	
 	lcdSetCs();
 }
+
 void lcdWriteCmd(u16 idx,u16 data)
 {
 	lcdSetRD();
@@ -143,67 +142,61 @@ void MainLCD_Init(void)
 	lcdWriteReg(0X0000);
 	lcdWriteReg(0X0000);
 	lcdWriteReg(0X0000);
-	
-		//************* Start Initial Sequence **********//
-	lcdWriteCmd(0x0702, 0x3008);// Set internal timing, don?t change this value
-	lcdWriteCmd(0x0705, 0x0036);// Set internal timing, don?t change this value
-	lcdWriteCmd(0x070B, 0x1213);// Set internal timing, don?t change this value
-	lcdWriteCmd(0x0001, 0x0100);// set SS and SM bit
-	lcdWriteCmd(0x0002, 0x0100);// set 1 line inversion
-	lcdWriteCmd(0x0003, 0x1038);// set GRAM write direction and BGR=1.
-	lcdWriteCmd(0x0008, 0x0202);// set the back porch and front porch
-	lcdWriteCmd(0x0009, 0x0000);// set non-display area refresh cycle ISC[3:0]
-	lcdWriteCmd(0x000C, 0x0000);// RGB interface setting
-	lcdWriteCmd(0x000F, 0x0000);// RGB interface polarity
-	//*************Power On sequence ****************//
-	lcdWriteCmd(0x0100, 0x0000);// SAP, BT[3:0], AP, DSTB, SLP, STB
-	lcdWriteCmd(0x0102, 0x0000);// VREG1OUT voltage
-	lcdWriteCmd(0x0103, 0x0000);// VDV[4:0] for VCOM amplitude
-	Delay_mS(50);Delay_mS(50);Delay_mS(50);Delay_mS(50);// Dis-charge capacitor power voltage
-	lcdWriteCmd(0x0100, 0x1190);// SAP, BT[3:0], AP, DSTB, SLP, STB
-	lcdWriteCmd(0x0101, 0x0227);// DC1[2:0], DC0[2:0], VC[2:0]
-	Delay_mS(50);                          // Delay 50ms
-	lcdWriteCmd(0x0102, 0x01BD);// VREG1OUT voltage
-	Delay_mS(50);                          // Delay 50ms
-	lcdWriteCmd(0x0103, 0x2500);// VDV[4:0] for VCOM amplitude
-	lcdWriteCmd(0x0281, 0x0010);// VCM[5:0] for VCOMH
-	Delay_mS(50);
-	lcdWriteCmd(0x0200, 0x0000);// GRAM horizontal Address
-	lcdWriteCmd(0x0201, 0x0000);// GRAM Vertical Address
-	// ----------- Adjust the Gamma Curve ----------//
-	lcdWriteCmd(0x0300, 0x0003);
-	lcdWriteCmd(0x0301, 0x0707);
-	lcdWriteCmd(0x0302, 0x0606);
-	lcdWriteCmd(0x0305, 0x0000);
-	lcdWriteCmd(0x0306, 0x0D00);
-	lcdWriteCmd(0x0307, 0x0706);
-	lcdWriteCmd(0x0308, 0x0005);
-	lcdWriteCmd(0x0309, 0x0007);
-	lcdWriteCmd(0x030C, 0x0000);
-	lcdWriteCmd(0x030D, 0x000A);
-	//------------------ Set GRAM area ---------------//
-	lcdWriteCmd(0x0210, 0x0000);// Horizontal GRAM Start Address
-	lcdWriteCmd(0x0211, 0x00EF);// Horizontal GRAM End Address
-	lcdWriteCmd(0x0212, 0x0000);// Vertical GRAM Start Address
-	lcdWriteCmd(0x0213, 0x018F);// Vertical GRAM End Address
-	lcdWriteCmd(0x0400, 0x3100);// Gate Scan Line 400 lines
-	lcdWriteCmd(0x0401, 0x0001);// NDL,VLE, REV
-	lcdWriteCmd(0x0404, 0x0000);// set scrolling line
-	//-------------- Partial Display Control ---------//
-	lcdWriteCmd(0x0500, 0x0000);// Partial Image 1 Display Position
-	lcdWriteCmd(0x0501, 0x0000);// Partial Image 1 RAM Start/End Address
-	lcdWriteCmd(0x0502, 0x0000);// Partial Image 1 RAM Start/End Address
-	lcdWriteCmd(0x0503, 0x0000);// Partial Image 2 Display Position
-	lcdWriteCmd(0x0504, 0x0000);// Partial Image 2 RAM Start/End Address
-	lcdWriteCmd(0x0505, 0x0000);// Partial Image 2 RAM Start/End Address
-	//-------------- Panel Control -------------------//
-	lcdWriteCmd(0x0003, 0x1018);
-	lcdWriteCmd(0x0010, 0x0010);// DIVI[1:0];RTNI[4:0]
-	lcdWriteCmd(0x0011, 0x0600);// NOWI[2:0];SDTI[2:0]
-	lcdWriteCmd(0x0020, 0x0002);// DIVE[1:0];RTNE[5:0]
-	lcdWriteCmd(0x0007, 0x0173);// 262K color and display ON	
 
-	Delay_mS(50);Delay_mS(50);Delay_mS(50);Delay_mS(50);
+	lcdWriteCmd(0x0400, 0x6200);
+	lcdWriteCmd(0x0008, 0x0808);
+
+	// ----------- Adjust the Gamma Curve ----------//
+	lcdWriteCmd(0x0300, 0x0C0C);
+	lcdWriteCmd(0x0301, 0xFF13);
+	lcdWriteCmd(0x0302, 0x0F0F);
+	lcdWriteCmd(0x0303, 0x150B);
+	lcdWriteCmd(0x0304, 0x1020);
+	lcdWriteCmd(0x0305, 0x0a0b);
+	lcdWriteCmd(0x0306, 0x0003);
+	lcdWriteCmd(0x0307, 0x0d06);
+	lcdWriteCmd(0x0308, 0x0504);
+	lcdWriteCmd(0x0309, 0x1030);	
+	
+	lcdWriteCmd(0x0010, 0x0010);
+	lcdWriteCmd(0x0011, 0x0101);
+	lcdWriteCmd(0x0012, 0x0000);
+	lcdWriteCmd(0x0013, 0x0001);	
+	
+	//*************Power On sequence ****************//
+	lcdWriteCmd(0x0100, 0x0330);// BT[3:0], AP[1:0], DSTB
+	lcdWriteCmd(0x0101, 0x0247);// DC1[2:0], DC0[2:0], VC[2:0]
+	lcdWriteCmd(0x0103, 0x1000);// VDV[4:0] for VCOM amplitude
+	lcdWriteCmd(0x0280, 0xbf00);// VCM[5:0] for VCOMH
+	lcdWriteCmd(0x0102, 0xd1b0);// VRH,VCMR,PSON,PON
+
+  Delay_mS(50);Delay_mS(50);
+
+	lcdWriteCmd(0x0001, 0x0100);
+	lcdWriteCmd(0x0002, 0x0100);
+	lcdWriteCmd(0x0003, 0x1018);
+	lcdWriteCmd(0x0009, 0x0001);
+	lcdWriteCmd(0x000C, 0x0000);
+	lcdWriteCmd(0x0090, 0x8000);
+	lcdWriteCmd(0x000f, 0x0000);
+
+  lcdWriteCmd(0x0210, 0x0000);
+	lcdWriteCmd(0x0211, 0x00ef);
+	lcdWriteCmd(0x0212, 0x0000);
+	lcdWriteCmd(0x0213, 0x018f);
+
+	lcdWriteCmd(0x0500, 0x0000);
+	lcdWriteCmd(0x0501, 0x0000);
+	lcdWriteCmd(0x0502, 0x005f);
+	lcdWriteCmd(0x0401, 0x0001);
+	lcdWriteCmd(0x0404, 0x0000);
+
+  lcdWriteCmd(0x0007, 0x0100);
+
+  lcdWriteCmd(0x0200, 0x0000);
+	lcdWriteCmd(0x0201, 0x0000);
+
+	Delay_mS(50);Delay_mS(50);
 }
 void lcdSetRamAddr(u16 x,u16 y)
 {

@@ -25,6 +25,7 @@ void CAN_Process(void)
   u8 resFailed[8] = {0x46,0x61,0x69,0x6C,0x65,0x64,0x4D};//F  a	i  l  e  d	M
 	u8 resWating[8] = {0x57,0x61,0x69,0x74,0x69,0x6e,0x69};//Waiting
 	u8 canresp[8] =   {'J','a','n','e','S','U','S'};		      //Receive   		//46,61,69,6C,65,64,4D	
+	u8 canonoff[8] = {0x52,0x65,0x61};
 	u8 canbuf[8];
 	u8 key;   //
 	u8 tmpchr;//
@@ -41,7 +42,7 @@ void CAN_Process(void)
 			{
 				res = Can_Send_Msg(resFailed,3);//·¢ËÍ3¸ö×Ö½Ú
 				waittime=0;	err_cnt++;Delay_mS(40);
-				if (err_cnt>30)		
+				if (err_cnt>15)		
 				{
 					err_cnt=0;	finished = TRUE; keepres = FALSE; status = 0x61;	//'a'
 				}
@@ -89,8 +90,12 @@ void CAN_Process(void)
 					jWriteFlashC(&flashFileInfo,each_byte);
 					flashFileInfo.F_Start = FileInfo_PIC1;			
 					gPkgIndex++;
+					finished = FALSE; status = 'e';	sndback = TRUE;
 				}
-				finished = FALSE; status = 'e';	sndback = TRUE;
+				else
+				{
+					finished = FALSE; sndback = FALSE;  status = 'a';	
+				}
 		}
 		if (sndback)
 		{
@@ -156,12 +161,14 @@ void CAN_Process(void)
 						if(tmpchr>0x2F && tmpchr<0x50)
 						{
 							Target_ID = tmpchr - 0x30;
-							TRUNONOFF_LCD(Target_ID,CMD_TRUNON_LCD);
+							canonoff[3]=TRUNONOFF_LCD(Target_ID,CMD_TRUNON_LCD);
+				      res = Can_Send_Msg(canonoff,4);
 						}
 						else 
 						{
 							Target_ID = tmpchr - 0x50;
-							TRUNONOFF_LCD(Target_ID,CMD_TRUNOFF_LCD);
+							canonoff[3]=TRUNONOFF_LCD(Target_ID,CMD_TRUNOFF_LCD);
+							res = Can_Send_Msg(canonoff,4);
 						}
 						if(file_byte>0){each_byte = 0;rec_byte = 0;gPkgIndex = 0;status = 's'; sndback = TRUE;}
 					} 

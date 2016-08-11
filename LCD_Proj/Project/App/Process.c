@@ -3,9 +3,9 @@
 
 u8 readBuf[]={"this is a rs485 demo"};
 u8 gDeviceAddr=10;
-#define PIC_TYPE_BMP 0
-#define PIC_TYPE_JPG 1
 u8 gPicDrawType=PIC_TYPE_BMP;
+u8 gDeviceOnOffFlag=1;
+
 FileInfoStruct_Flash flashFileInfo_ID;
 FileInfoStruct_Flash flashFileInfo;
 void ProcessInit()
@@ -30,19 +30,26 @@ void ProcessInit()
 	F_Open_Flash(&flashFileInfo_ID);
 	sFLASH_ReadBuffer(&gPicDrawType,flashFileInfo_ID.F_Start,flashFileInfo_ID.F_Size);
 	
+	flashFileInfo_ID.F_Start = FileInfo_OnOff;
+	flashFileInfo_ID.F_Size = 1;	
+	F_Open_Flash(&flashFileInfo_ID);
+	sFLASH_ReadBuffer(&gDeviceOnOffFlag,flashFileInfo_ID.F_Start,flashFileInfo_ID.F_Size);
+	
 	if(gPicDrawType==PIC_TYPE_BMP)
 	{
+		if(gDeviceOnOffFlag==1)lcdLedSet(1);
+		else lcdLedSet(0);
 		flashFileInfo.F_Start = FileInfo_PIC1;
 		F_Open_Flash(&flashFileInfo);				
 		lcdDrawPicFromFs(flashFileInfo);
 	}
 	else if(gPicDrawType==PIC_TYPE_JPG)
 	{
-		lcdLedSet(0x00);
+		if(gDeviceOnOffFlag==1)lcdLedSet(1);
+		else lcdLedSet(0);
 		flashFileInfo.F_Start = FileInfo_PIC2;
 		lcdDrawJPicFromFs(flashFileInfo);
 		lcdOpenWindows(0,0,lcdWIDTH,lcdHEIGHT);
-		lcdLedSet(0x01);
 	}
 }
 
@@ -123,6 +130,17 @@ void StoreAddrToFlash()
 	F_Open_Flash(&flashFileInfo_ID);
 	jWriteFlashC(&flashFileInfo_ID,flashFileInfo_ID.F_Size);
 }
+void StoreOnOffFlagToFlash()
+{
+	FileInfoStruct_Flash flashFileInfo_ID;
+	
+	flashFileInfo_ID.F_Start = FileInfo_OnOff;
+	flashFileInfo_ID.F_Size = 1;
+	
+	jpg_buffer[0]=gDeviceOnOffFlag;
+	F_Open_Flash(&flashFileInfo_ID);
+	jWriteFlashC(&flashFileInfo_ID,flashFileInfo_ID.F_Size);
+}
 #define CMD_GET_ADDR 0
 #define CMD_SET_ADDR 1
 #define CMD_TRUNON_LCD 2
@@ -186,7 +204,8 @@ void SlaveFunc()
 		if(gRxBuffer[1]==CMD_TRUNON_LCD)
 		{
 			lcdLedSet(1);
-
+			gDeviceOnOffFlag=1;
+      StoreOnOffFlagToFlash();
 			gTxBuffer[i]=gDeviceAddr;i++;
 			gTxBuffer[i]=CMD_TRUNON_LCD;i++;
 			crcValue=Cal_CRC16(gTxBuffer,i);
@@ -197,7 +216,8 @@ void SlaveFunc()
 		else if(gRxBuffer[1]==CMD_TRUNOFF_LCD)
 		{
 			lcdLedSet(0);
-
+			gDeviceOnOffFlag=0;
+      StoreOnOffFlagToFlash();
 			gTxBuffer[i]=gDeviceAddr;i++;
 			gTxBuffer[i]=CMD_TRUNOFF_LCD;i++;
 			crcValue=Cal_CRC16(gTxBuffer,i);
@@ -385,6 +405,10 @@ void SlaveFunc()
 				else
 				{
 					gFileRxStatus=STATUS_PKG_INDEX_ERROR;
+				}
+				if(gFileRxStatus==STATUS_OK)
+				{
+					printf("Rec Pic:%d/%d\n",gPkgIndex,gFileRxPkgCount);
 				}
 			}
 			else

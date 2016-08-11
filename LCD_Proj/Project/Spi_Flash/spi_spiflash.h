@@ -11,6 +11,7 @@ typedef struct{
 
 #define FileInfo_DrawType   0x0000
 #define FileInfo_485ID      0x1000
+#define FileInfo_OnOff      0x2000
 
 #define PIC1_Info        0x10000
 #define FileInfo_PIC1    0x11000

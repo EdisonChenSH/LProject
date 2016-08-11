@@ -183,10 +183,11 @@ void StoreCANAddrToFlash()
 	jWriteFlashC(&flashFileInfo_ID,flashFileInfo_ID.F_Size);
 }
 
-void TRUNONOFF_LCD(uint8_t Rs485_Id,uint8_t OnOffCmd)
+uint8_t TRUNONOFF_LCD(uint8_t Rs485_Id,uint8_t OnOffCmd)
 {	
   u16 crcValue=0;
 	u8 i=0;
+	u8 returnglag=0;
 	
 	Rs485_Id_Rec=Rs485_Id;
 	
@@ -202,7 +203,9 @@ void TRUNONOFF_LCD(uint8_t Rs485_Id,uint8_t OnOffCmd)
 		Rs485_Process();
 	}	
   StopRecTimer();
+	returnglag=Rs485_Rec_Flag.OnOff_Flag;
 	Rs485_Rec_Flag.OnOff_Flag = 0;
+	return returnglag;
 }
 
 u8 Read_Ir(uint8_t Rs485_Id)

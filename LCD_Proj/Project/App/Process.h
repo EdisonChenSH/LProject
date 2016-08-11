@@ -1,6 +1,9 @@
 #ifndef _PROCESS_H_
 #define _PROCESS_H_
 
+#define PIC_TYPE_BMP 0
+#define PIC_TYPE_JPG 1
+
 #include "stm32f10x.h"
 #include "LCD.h"
 #include "delay.h"

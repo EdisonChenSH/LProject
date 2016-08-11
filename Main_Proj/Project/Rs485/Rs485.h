@@ -52,7 +52,7 @@ extern u32  gSystemWorkLedCounter;
 void test_485_Trans(void);
 void Init_Rs485(void);
 void Rs485_Process(void);
-void TRUNONOFF_LCD(uint8_t Rs485_Id,uint8_t OnOffCmd);
+uint8_t TRUNONOFF_LCD(uint8_t Rs485_Id,uint8_t OnOffCmd);
 void Save_Pic_Size(u32 FileInfo_PIC,PicInfo picinfo);
 PicInfo Get_Pic_Size(u32 FileInfo_PIC);
 void Update_Pic(uint8_t Rs485_Id);
